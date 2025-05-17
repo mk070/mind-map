@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased font-inter;
+  }
+  
+  body {
+    @apply bg-background-light dark:bg-background-dark text-surface-dark dark:text-surface-light min-h-screen transition-colors duration-300;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-clash font-semibold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+  
+  h4 {
+    @apply text-lg md:text-xl lg:text-2xl;
+  }
+}
+
+@layer components {
+  .node {
+    @apply relative px-4 py-3 rounded-lg border border-transparent transition-all shadow-lg
+    hover:border-primary-300/20 dark:hover:border-primary-300/30 cursor-pointer;
+  }
+  
+  .node-main {
+    @apply node bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-sm;
+  }
+  
+  .node-child {
+    @apply node bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-sm;
+  }
+  
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 
+    focus:outline-none focus:ring-2 focus:ring-primary-500/50;
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary-500 hover:bg-primary-600 text-white;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-secondary-500 hover:bg-secondary-600 text-white;
+  }
+  
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-surface-dark/10 dark:hover:bg-surface-light/10;
+  }
+  
+  .sidebar-item {
+    @apply flex items-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer
+    hover:bg-primary-500/10 dark:hover:bg-primary-500/20;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-primary-500/20 dark:bg-primary-500/30 text-primary-700 dark:text-primary-300;
+  }
+  
+  .tooltip {
+    @apply absolute p-2 text-xs font-medium rounded shadow-lg bg-surface-dark dark:bg-surface-light 
+    text-surface-light dark:text-surface-dark z-50 transition-opacity;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg;
+  }
+  
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-lg border border-white/10 shadow-lg;
+  }
+}

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useMindMap } from '../../context/MindMapContext';
 import Node from './Node';
@@ -94,34 +94,48 @@ const Canvas = () => {
 
   // Create a stable drag handler function
   const createDragHandler = useCallback((nodeId) => {
-    return (x, y) => {
-      startDraggingNode(nodeId);
-      handleNodeDrag(nodeId, x, y);
-    };
-  }, [startDraggingNode, handleNodeDrag]);
+    if (!nodeHandlers.current[nodeId]) {
+      nodeHandlers.current[nodeId] = (x, y) => {
+        handleNodeDrag(nodeId, x, y);
+      };
+    }
+    return nodeHandlers.current[nodeId];
+  }, [handleNodeDrag]);
 
   // Store drag handlers by node ID to prevent recreating them on each render
   const nodeHandlers = useRef({});
 
-  // Initialize handlers for new nodes
+  // Memoize node handlers
   useEffect(() => {
+    const newHandlers = {};
     nodes.forEach(node => {
       if (!nodeHandlers.current[node.id]) {
-        nodeHandlers.current[node.id] = createDragHandler(node.id);
+        newHandlers[node.id] = createDragHandler(node.id);
+      } else {
+        newHandlers[node.id] = nodeHandlers.current[node.id];
       }
     });
+    
+    // Only update if handlers changed
+    const handlersChanged = Object.keys(newHandlers).length !== Object.keys(nodeHandlers.current).length ||
+      Object.keys(newHandlers).some(id => newHandlers[id] !== nodeHandlers.current[id]);
+      
+    if (handlersChanged) {
+      nodeHandlers.current = newHandlers;
+    }
   }, [nodes, createDragHandler]);
 
-  // Clean up handlers for removed nodes
-  useEffect(() => {
-    const currentIds = new Set(nodes.map(node => node.id));
-    Object.keys(nodeHandlers.current).forEach(id => {
-      if (!currentIds.has(id)) {
-        delete nodeHandlers.current[id];
-      }
-    });
-  }, [nodes]);
-  
+  // Memoize nodes to prevent unnecessary re-renders
+  const nodeElements = useMemo(() => {
+    return nodes.map(node => (
+      <Node
+        key={node.id}
+        node={node}
+        onDrag={nodeHandlers.current[node.id]}
+      />
+    ));
+  }, [nodes, nodeHandlers.current]);
+
   // Handle zooming with mouse wheel using a non-passive event listener
   const handleWheel = useCallback((e) => {
     e.preventDefault(); // Works because we set passive: false in the event listener
@@ -217,13 +231,7 @@ const Canvas = () => {
           zIndex: 2,
           pointerEvents: 'none' // Let individual nodes handle their own events
         }}>
-          {nodes.map(node => (
-            <Node
-              key={node.id}
-              node={node}
-              onDrag={nodeHandlers.current[node.id]}
-            />
-          ))}
+          {nodeElements}
         </div>
       </div>
       

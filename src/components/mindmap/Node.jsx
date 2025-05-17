@@ -70,8 +70,8 @@ const Node = ({ node, onDrag }) => {
       style={{ 
         left: node.x, 
         top: node.y,
-        zIndex: isDragging ? 10 : 1, // Higher z-index when dragging
-        pointerEvents: 'auto' // Ensure node is interactive
+        zIndex: isDragging ? 10 : 1,
+        pointerEvents: 'auto'
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -88,12 +88,21 @@ const Node = ({ node, onDrag }) => {
         stopDraggingNode();
       }}
       onDrag={(e, info) => {
-        const { x, y } = info.point;
-        onDrag(x, y);
+        // Only update position when actually dragging (not just hovering)
+        if (isDragging) {
+          const { x, y } = info.point;
+          onDrag(x, y);
+        }
       }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       dragElastic={0}
+      dragConstraints={{
+        left: -Infinity,
+        right: Infinity,
+        top: -Infinity,
+        bottom: Infinity,
+      }}
     >
       <div className="flex items-center gap-2 min-w-[120px]">
         <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>

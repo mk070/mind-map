@@ -1,64 +1,58 @@
 import React, { useEffect, useRef } from 'react';
-import { getBezierPath } from '../../utils/helpers';
 import { useSettingsStore } from '../../store/settingsStore';
-import { gsap } from 'gsap';
 
 const Connection = ({ connection, nodes }) => {
-  const { lineStyle, lineThickness, animationsEnabled } = useSettingsStore();
+  const { lineThickness } = useSettingsStore();
   const pathRef = useRef(null);
   
   const fromNode = nodes.find(node => node.id === connection.from);
   const toNode = nodes.find(node => node.id === connection.to);
-  
-  // Apply line drawing animation on first render
+
+  // Debug log
   useEffect(() => {
-    if (!pathRef.current || !animationsEnabled) return;
-    
-    gsap.effects.connectionDraw(pathRef.current);
-  }, [animationsEnabled]);
+    console.log('Connection debug:', {
+      connection,
+      fromNode: fromNode ? { id: fromNode.id, x: fromNode.x, y: fromNode.y } : null,
+      toNode: toNode ? { id: toNode.id, x: toNode.x, y: toNode.y } : null,
+      nodesCount: nodes.length,
+      hasFromNode: !!fromNode,
+      hasToNode: !!toNode
+    });
+  }, [connection, fromNode, toNode, nodes.length]);
   
-  if (!fromNode || !toNode) return null;
-  
-  // Calculate connection points
-  // For parent node, connect from right edge to child's left edge
-  const fromX = fromNode.x + 150;  // Right edge of parent
-  const fromY = fromNode.y + 25;   // Vertical center
-  const toX = toNode.x;            // Left edge of child
-  const toY = toNode.y + 25;       // Vertical center
-  
-  let path;
-  
-  switch (lineStyle) {
-    case 'straight':
-      path = `M ${fromX} ${fromY} L ${toX} ${toY}`;
-      break;
-    case 'curved':
-      const midX = (fromX + toX) / 2;
-      const midY = (fromY + toY) / 2;
-      path = `M ${fromX} ${fromY} Q ${midX} ${midY}, ${toX} ${toY}`;
-      break;
-    case 'bezier':
-    default:
-      path = getBezierPath(fromX, fromY, toX, toY);
-      break;
+  if (!fromNode || !toNode) {
+    console.log('Skipping connection - missing nodes');
+    return null;
   }
+  
+  // Simple straight line for now
+  const fromX = fromNode.x + 120; // Right edge of parent
+  const fromY = fromNode.y + 20;  // Vertical center
+  const toX = toNode.x;           // Left edge of child
+  const toY = toNode.y + 20;      // Vertical center
+  
+  const path = `M ${fromX} ${fromY} L ${toX} ${toY}`;
   
   return (
     <svg 
       className="absolute top-0 left-0 w-full h-full pointer-events-none"
-      style={{ 
-        zIndex: 1,  // Ensure lines appear behind nodes
-        overflow: 'visible'  // Allow lines to be visible outside container
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 1,
+        overflow: 'visible'
       }}
     >
       <path
         ref={pathRef}
         d={path}
-        stroke="#94a3b8"  // Default line color
+        stroke="#ff0000"  // Bright red for visibility
         strokeWidth={lineThickness || 2}
         fill="none"
-        strokeDasharray={lineStyle === 'dashed' ? '5,5' : 'none'}
-        className="text-primary-500/70 dark:text-primary-400/70"
+        strokeDasharray="none"
       />
       
       {/* Arrow at the end of the line */}
@@ -66,7 +60,7 @@ const Connection = ({ connection, nodes }) => {
         cx={toX} 
         cy={toY} 
         r={3} 
-        className="fill-primary-500 dark:fill-primary-400"
+        fill="#ff0000"
       />
     </svg>
   );

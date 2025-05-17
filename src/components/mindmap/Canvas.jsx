@@ -24,6 +24,16 @@ const Canvas = () => {
   
   const { snapToGrid } = useSettingsStore();
   const isDraggingCanvas = useRef(false);
+  
+  // Debug log connections and nodes
+  useEffect(() => {
+    console.log('Canvas state:', {
+      nodes: nodes.map(n => ({ id: n.id, x: n.x, y: n.y, parentId: n.parentId })),
+      connections: [...connections],
+      nodesCount: nodes.length,
+      connectionsCount: connections.length
+    });
+  }, [nodes, connections]);
   const lastMousePos = useRef({ x: 0, y: 0 });
   const [canvasSize, setCanvasSize] = useState({ width: 5000, height: 5000 });
   
@@ -170,7 +180,7 @@ const Canvas = () => {
     >
       <div 
         ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full"
+        className="absolute top-0 left-0 w-full h-full overflow-visible"
         style={{
           width: canvasSize.width,
           height: canvasSize.height,
@@ -178,8 +188,17 @@ const Canvas = () => {
           transformOrigin: '0 0',
         }}
       >
-        {/* Render connections first so they appear behind nodes */}
-        <div className="absolute inset-0" style={{ zIndex: 1 }}>
+        {/* Connection Layer */}
+        <div className="absolute inset-0" style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 1,
+          pointerEvents: 'none',
+          overflow: 'visible'
+        }}>
           {connections.map(connection => (
             <Connection
               key={`${connection.from}-${connection.to}`}
@@ -189,8 +208,14 @@ const Canvas = () => {
           ))}
         </div>
         
-        {/* Render nodes on top of connections */}
-        <div className="relative" style={{ zIndex: 2 }}>
+        {/* Node Layer */}
+        <div className="relative" style={{
+          position: 'relative',
+          zIndex: 2,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'auto'
+        }}>
           {nodes.map(node => (
             <Node
               key={node.id}

@@ -6,18 +6,21 @@ export const useNodeStore = create((set, get) => ({
   connections: [],
   
   addNode: ({ x = 0, y = 0, content = 'New Node', color = 'primary', parentId = null }) => {
+    let newNodeId = nanoid();
+    
     set(state => {
       // If this is a child node, position it relative to its parent
       if (parentId) {
         const parent = state.nodes.find(n => n.id === parentId);
         if (parent) {
+          const children = state.getNodeChildren(parentId);
           x = parent.x + 200; // Offset child to the right of parent
-          y = parent.y + (state.getNodeChildren(parentId).length * 60); // Stack children vertically
+          y = parent.y + (children.length * 80 - 40); // Stack children vertically with 80px spacing
         }
       }
 
       const newNode = {
-        id: nanoid(),
+        id: newNodeId,
         x,
         y,
         content,
@@ -32,7 +35,7 @@ export const useNodeStore = create((set, get) => ({
         newConnections.push({
           id: nanoid(),
           from: parentId,
-          to: newNode.id
+          to: newNodeId
         });
       }
       
@@ -43,7 +46,7 @@ export const useNodeStore = create((set, get) => ({
     });
     
     // Return the ID of the new node
-    return newNode.id;
+    return newNodeId;
   },
   
   updateNode: (id, updates) => {

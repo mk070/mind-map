@@ -7,19 +7,25 @@ import Controls from './Controls';
 import { useSettingsStore } from '../../store/settingsStore';
 
 const Canvas = () => {
-  const { 
-    nodes, 
+  const {
+    nodes,
     connections,
+    addNode,
     updateNodePosition,
-    canvasRef,
-    scale,
-    position,
-    setCanvasPosition,
-    draggingNodeRef,
+    removeNode,
+    selectNode,
     startDraggingNode,
     stopDraggingNode,
+    selectedNodeId,
+    setCanvasPosition,
     zoomIn,
-    zoomOut
+    zoomOut,
+    resetView,
+    canvasRef,
+    draggingNodeId,
+    scale,
+    position,
+    setSelectedNodeId
   } = useMindMap();
   
   const { snapToGrid } = useSettingsStore();
@@ -89,8 +95,38 @@ const Canvas = () => {
       x = Math.round(x / 32) * 32;
       y = Math.round(y / 32) * 32;
     }
-    updateNodePosition(id, x, y);
-  }, [snapToGrid, updateNodePosition]);
+    
+    // Find the node being dragged
+    const draggedNode = nodes.find(n => n.id === id);
+    if (!draggedNode) return;
+    
+    // Calculate the movement delta
+    const dx = x - draggedNode.x;
+    const dy = y - draggedNode.y;
+    
+    // Only update positions if there was actual movement
+    if (dx !== 0 || dy !== 0) {
+      // Update the dragged node's position
+      updateNodePosition(id, x, y);
+      
+      // If this is a root node, update all its children's positions
+      if (!draggedNode.parentId) {
+        const updateChildrenPositions = (parentId, dx, dy) => {
+          const children = nodes.filter(n => n.parentId === parentId);
+          children.forEach(child => {
+            const newX = child.x + dx;
+            const newY = child.y + dy;
+            updateNodePosition(child.id, newX, newY);
+            
+            // Recursively update grandchildren
+            updateChildrenPositions(child.id, dx, dy);
+          });
+        };
+        
+        updateChildrenPositions(id, dx, dy);
+      }
+    }
+  }, [snapToGrid, updateNodePosition, nodes]);
 
   // Create a stable drag handler function
   const createDragHandler = useCallback((nodeId) => {
@@ -136,6 +172,13 @@ const Canvas = () => {
     ));
   }, [nodes, nodeHandlers.current]);
 
+  // Handle canvas click to deselect nodes
+  const handleCanvasClick = useCallback((e) => {
+    if (e.target === canvasRef.current) {
+      setSelectedNodeId(null);
+    }
+  }, [canvasRef, setSelectedNodeId]);
+  
   // Handle zooming with mouse wheel using a non-passive event listener
   const handleWheel = useCallback((e) => {
     e.preventDefault(); // Works because we set passive: false in the event listener
@@ -188,6 +231,7 @@ const Canvas = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onClick={handleCanvasClick}
       // onWheel handled by addEventListener with { passive: false }
     >
       <div 

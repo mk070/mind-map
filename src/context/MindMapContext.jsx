@@ -44,8 +44,11 @@ export const MindMapProvider = ({ children }) => {
     draggingNodeRef.current = null;
   };
 
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+
   const selectNode = (nodeId) => {
     selectedNodeRef.current = nodeId;
+    setSelectedNodeId(nodeId);
   };
 
   const addChildNode = (parentId) => {
@@ -79,12 +82,15 @@ export const MindMapProvider = ({ children }) => {
     zoomOut,
     resetView,
     setCanvasPosition,
-    draggingNodeRef,
     startDraggingNode,
     stopDraggingNode,
-    selectedNodeRef,
     selectNode,
+    setSelectedNodeId,
     addChildNode,
+    draggingNodeRef,
+    selectedNodeRef,
+    selectedNodeId,
+    draggingNodeId: draggingNodeRef.current,
   };
 
   return (

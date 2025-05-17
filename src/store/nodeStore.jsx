@@ -17,6 +17,22 @@ export const useNodeStore = create((set, get) => ({
           x = parent.x + 200; // Offset child to the right of parent
           y = parent.y + (children.length * 80 - 40); // Stack children vertically with 80px spacing
         }
+      } else {
+        // Position new main nodes with an offset from existing ones
+        const mainNodes = state.nodes.filter(node => !node.parentId);
+        if (mainNodes.length > 0) {
+          // Find the bottom-most main node
+          const bottomNode = mainNodes.reduce((bottom, node) => 
+            node.y > bottom.y ? node : bottom, mainNodes[0]);
+          
+          // Position new node below the bottom-most node with some spacing
+          x = bottomNode.x;
+          y = bottomNode.y + 120; // 120px vertical spacing between main nodes
+        } else {
+          // First main node
+          x = window.innerWidth / 2 - 100; // Center horizontally
+          y = window.innerHeight / 2 - 20; // Center vertically
+        }
       }
 
       const newNode = {

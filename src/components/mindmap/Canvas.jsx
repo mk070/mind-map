@@ -54,13 +54,11 @@ const Canvas = () => {
   }, [nodes]);
   
   const handleMouseDown = (e) => {
-    // Only start dragging if it's the canvas itself (not a child element)
-    if (e.target === canvasRef.current) {
+    // Only start canvas drag if clicking on the canvas itself, not on a node
+    if (e.target === e.currentTarget || e.target.closest('.canvas-bg')) {
       isDraggingCanvas.current = true;
-      lastMousePos.current = {
-        x: e.clientX,
-        y: e.clientY
-      };
+      lastMousePos.current = { x: e.clientX, y: e.clientY };
+      document.body.style.cursor = 'grabbing';
     }
   };
   
@@ -180,23 +178,24 @@ const Canvas = () => {
     >
       <div 
         ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full overflow-visible"
+        className="absolute top-0 left-0 w-full h-full overflow-visible canvas-bg"
         style={{
           width: canvasSize.width,
           height: canvasSize.height,
           transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
           transformOrigin: '0 0',
+          pointerEvents: 'auto' // Ensure canvas can receive events
         }}
       >
-        {/* Connection Layer */}
-        <div className="absolute inset-0" style={{
+        {/* Connection Layer - Behind everything */}
+        <div className="connection-layer" style={{
           position: 'absolute',
           top: 0,
           left: 0,
           width: '100%',
           height: '100%',
           zIndex: 1,
-          pointerEvents: 'none',
+          pointerEvents: 'none', // Allow clicks to pass through to nodes/canvas
           overflow: 'visible'
         }}>
           {connections.map(connection => (
@@ -208,13 +207,15 @@ const Canvas = () => {
           ))}
         </div>
         
-        {/* Node Layer */}
-        <div className="relative" style={{
-          position: 'relative',
-          zIndex: 2,
+        {/* Node Layer - On top of connections */}
+        <div className="node-layer" style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
           width: '100%',
           height: '100%',
-          pointerEvents: 'auto'
+          zIndex: 2,
+          pointerEvents: 'none' // Let individual nodes handle their own events
         }}>
           {nodes.map(node => (
             <Node

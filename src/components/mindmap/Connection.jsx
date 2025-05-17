@@ -35,7 +35,7 @@ const Connection = ({ connection, nodes }) => {
   
   return (
     <svg 
-      className="absolute top-0 left-0 w-full h-full pointer-events-none"
+      className="absolute top-0 left-0 w-full h-full"
       style={{
         position: 'absolute',
         top: 0,
@@ -43,7 +43,8 @@ const Connection = ({ connection, nodes }) => {
         width: '100%',
         height: '100%',
         zIndex: 1,
-        overflow: 'visible'
+        overflow: 'visible',
+        pointerEvents: 'none' // This allows clicks to pass through to the canvas
       }}
     >
       <path

@@ -66,17 +66,26 @@ const Node = ({ node, onDrag }) => {
   return (
     <motion.div
       ref={nodeRef}
-      className={`absolute ${isMainNode ? 'node-main' : 'node-child'} ${isSelected ? 'ring-2 ring-primary-500' : ''}`}
+      className={`absolute ${isMainNode ? 'node-main' : 'node-child'} ${isSelected ? 'ring-2 ring-primary-500' : ''} cursor-move`}
       style={{ 
         left: node.x, 
         top: node.y,
+        zIndex: isDragging ? 10 : 1, // Higher z-index when dragging
+        pointerEvents: 'auto' // Ensure node is interactive
       }}
-      onClick={() => selectNode(node.id)}
+      onClick={(e) => {
+        e.stopPropagation();
+        selectNode(node.id);
+      }}
       drag
       dragMomentum={false}
-      onDragStart={() => {
+      onDragStart={(e, info) => {
+        e.stopPropagation();
         selectNode(node.id);
         startDraggingNode(node.id);
+      }}
+      onDragEnd={() => {
+        stopDraggingNode();
       }}
       onDrag={(e, info) => {
         const { x, y } = info.point;
@@ -84,6 +93,7 @@ const Node = ({ node, onDrag }) => {
       }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
+      dragElastic={0}
     >
       <div className="flex items-center gap-2 min-w-[120px]">
         <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>

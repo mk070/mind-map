@@ -34,10 +34,10 @@ const Canvas = () => {
   // Debug log connections and nodes
   useEffect(() => {
     console.log('Canvas state:', {
-      nodes: nodes.map(n => ({ id: n.id, x: n.x, y: n.y, parentId: n.parentId })),
-      connections: [...connections],
-      nodesCount: nodes.length,
-      connectionsCount: connections.length
+      nodes: nodes.map(n => ({ id: n.id, x: n.x, y: n.y, parentId: n.parentId,data: n.content })),
+      // connections: [...connections],
+      // nodesCount: nodes.length,
+      // connectionsCount: connections.length
     });
   }, [nodes, connections]);
   const lastMousePos = useRef({ x: 0, y: 0 });

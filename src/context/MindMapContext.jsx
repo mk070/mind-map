@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useRef, useEffect } from 'r
 import { useNodeStore } from '../store/nodeStore';
 import { gsap } from 'gsap';
 
-
 const MindMapContext = createContext(null);
 
 export const useMindMap = () => {
@@ -14,7 +13,7 @@ export const useMindMap = () => {
 };
 
 export const MindMapProvider = ({ children }) => {
-  const { nodes, connections, addNode,updateNode, updateNodePosition, removeNode } = useNodeStore();
+  const { nodes, connections, addNode, updateNode, updateNodePosition, removeNode } = useNodeStore();
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const canvasRef = useRef(null);
@@ -89,7 +88,7 @@ export const MindMapProvider = ({ children }) => {
     }
     
     const results = nodes.filter(node => 
-      node.content.toLowerCase().includes(query.toLowerCase())
+      node.content && node.content.toLowerCase().includes(query.toLowerCase())
     );
     
     setSearchResults(results);
@@ -107,37 +106,41 @@ export const MindMapProvider = ({ children }) => {
     const canvas = canvasRef.current;
     const canvasRect = canvas.getBoundingClientRect();
     
-    // Get the viewport center relative to the canvas
+    // Get the viewport center
     const viewportCenterX = canvasRect.width / 2;
     const viewportCenterY = canvasRect.height / 2;
     
-    // Calculate the new position that will center the node
-    const targetX = viewportCenterX - (node.x * scale) - position.x;
-    const targetY = viewportCenterY - (node.y * scale) - position.y;
-
-    // Debug - remove in production
-    console.log("Node position:", node.x, node.y);
-    console.log("Canvas size:", canvasRect.width, canvasRect.height);
-    console.log("Current position:", position.x, position.y);
-    console.log("Target position:", targetX, targetY);
-
+    // Calculate the position needed to center the node
+    // Note: We need to invert the sign since we're moving the canvas, not the node
+    const targetX = viewportCenterX / scale - node.x;
+    const targetY = viewportCenterY / scale - node.y;
     
-    // Always animate the transition for smoother UX
-    gsap.to(position, {
-      x: targetX,
-      y: targetY,
+    // Use a ref to track the animation
+    const animationRef = { current: null };
+    
+    // Animate to the target position
+    animationRef.current = gsap.to({}, {
       duration: 0.75,
       ease: 'power2.out',
-      onUpdate: () => setPosition({ x: position.x, y: position.y }),
+      onUpdate: function() {
+        // Calculate interpolated position
+        const progress = this.progress();
+        const newX = position.x + (targetX - position.x) * progress;
+        const newY = position.y + (targetY - position.y) * progress;
+        console.log('newX: ',newX)
+        console.log('newY: ',newY)
+        
+        // Update position during animation
+        setPosition({ x: newX, y: newY });
+      },
       onComplete: () => {
-        // Set the final position when animation is complete
+        // Ensure final position is set exactly
         setPosition({ x: targetX, y: targetY });
         highlightNode(nodeId);
       }
     });
   };
   
-  // Add this highlightNode function that doesn't rely on animationsEnabled
   const highlightNode = (nodeId) => {
     // Get the node DOM element
     const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
@@ -149,7 +152,7 @@ export const MindMapProvider = ({ children }) => {
     gsap.fromTo(
       nodeElement,
       { 
-        boxShadow: '0 0 0 2px rgba(99, 102, 241, 0.7)' 
+        boxShadow: '0 0 0 4px rgba(99, 102, 241, 1)' 
       },
       { 
         boxShadow: '0 0 15px 5px rgba(99, 102, 241, 0)',
@@ -159,8 +162,10 @@ export const MindMapProvider = ({ children }) => {
         yoyo: true
       }
     );
+    
+    // Also select the node
+    selectNode(nodeId);
   };
-  
   
   const navigateToResult = (direction) => {
     if (searchResults.length === 0) return;
@@ -230,6 +235,7 @@ export const MindMapProvider = ({ children }) => {
     searchNodes,
     navigateToResult,
     resetSearch,
+    focusOnNode,
   };
 
   return (

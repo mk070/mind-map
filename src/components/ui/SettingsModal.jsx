@@ -93,7 +93,7 @@ const SettingsModal = () => {
               </div>
             </div>
             
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <label className="text-sm">Show grid</label>
               <div 
                 className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer transition-colors duration-200 ${showGrid ? 'bg-primary-500' : 'bg-surface-dark/20 dark:bg-surface-light/20'}`}
@@ -119,7 +119,7 @@ const SettingsModal = () => {
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               </div>
-            </div>
+            </div> */}
           </div>
           
           <div className="space-y-4">

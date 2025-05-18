@@ -49,7 +49,7 @@ const Sidebar = () => {
       resetSearch();
     }
   };
-  const [bottomPanelOpen, setBottomPanelOpen] = useState(false);
+  const [bottomPanelOpen, setBottomPanelOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('help'); // 'help' or 'settings'
   
   const handleAddMainNode = () => {
@@ -202,7 +202,7 @@ const Sidebar = () => {
                   </button>
                 </div>
                 {/* Bottom area - help and settings */}
-                <div className="mt-auto border-t border-surface-dark/10 dark:border-surface-light/10 pt-2">
+                <div className="fixed bottom-0 left-0 w-full border-t border-surface-dark/10 dark:border-surface-light/10 pt-2">
                   <div className="flex items-center justify-between px-2.5 py-1.5">
                     <div className="flex space-x-1">
                       <button 
@@ -216,7 +216,7 @@ const Sidebar = () => {
                       >
                         <HelpCircle size={16} />
                       </button>
-                      <button 
+                      {/* <button 
                         className={cn(
                           'p-1.5 rounded-md text-xs font-medium',
                           activeTab === 'settings' 
@@ -226,13 +226,13 @@ const Sidebar = () => {
                         onClick={() => setActiveTab('settings')}
                       >
                         <Settings size={16} />
-                      </button>
+                      </button> */}
                     </div>
                     <button 
                       onClick={() => setBottomPanelOpen(!bottomPanelOpen)}
                       className="text-surface-foreground/50 hover:text-surface-foreground/80 p-1"
                     >
-                      {bottomPanelOpen ?  <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      {bottomPanelOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                     </button>
                   </div>
                   <AnimatePresence>

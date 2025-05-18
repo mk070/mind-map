@@ -114,6 +114,8 @@ export const MindMapProvider = ({ children }) => {
     // Note: We need to invert the sign since we're moving the canvas, not the node
     const targetX = viewportCenterX / scale - node.x;
     const targetY = viewportCenterY / scale - node.y;
+    console.log('targetX: ',targetX)
+    console.log('targetY: ',targetY)
     
     // Use a ref to track the animation
     const animationRef = { current: null };
@@ -184,25 +186,52 @@ export const MindMapProvider = ({ children }) => {
     setCurrentResultIndex(-1);
   };
   
-  // Handle keyboard navigation
+  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (searchResults.length === 0) return;
-      
-      if (e.key === 'Enter' && e.shiftKey) {
-        // Shift+Enter: previous result
-        e.preventDefault();
-        navigateToResult(-1);
-      } else if (e.key === 'Enter') {
-        // Enter: next result
-        e.preventDefault();
-        navigateToResult(1);
+      // Prevent default behavior for all shortcuts
+      e.preventDefault();
+
+      // Add Main Node (N)
+      if (e.key === 'n' || e.key === 'N') {
+        const x = window.innerWidth / 2 - 75; // Center horizontally
+        const y = window.innerHeight / 2 - 25; // Center vertically
+        addNode({ x, y, content: 'New Main Node' });
+      }
+
+      // Delete Node (Delete)
+      if (e.key === 'Delete' && selectedNodeId) {
+        removeNode(selectedNodeId);
+        setSelectedNodeId(null);
+      }
+
+      // Add Child Node (Tab)
+      if (e.key === 'Tab' && selectedNodeId) {
+        addChildNode(selectedNodeId);
+      }
+
+      // Search (Cmd+K)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k' || e.key === 'K') {
+        setSearchQuery('');
+        setSearchResults([]);
+        setCurrentResultIndex(-1);
+      }
+
+      // Search navigation
+      if (searchResults.length > 0) {
+        if (e.key === 'Enter' && e.shiftKey) {
+          // Shift+Enter: previous result
+          navigateToResult(-1);
+        } else if (e.key === 'Enter') {
+          // Enter: next result
+          navigateToResult(1);
+        }
       }
     };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [searchResults, currentResultIndex]);
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedNodeId, searchResults, currentResultIndex]);
 
   const contextValue = {
     nodes,

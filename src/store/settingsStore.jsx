@@ -11,7 +11,7 @@ export const useSettingsStore = create((set) => ({
   
   // Mind map settings
   defaultNodeColor: 'primary-200',
-  lineStyle: 'bezier', // 'bezier', 'straight', 'curved'
+  lineStyle: 'curved', // 'bezier', 'straight', 'curved'
   lineThickness: 2,
   
   // Actions

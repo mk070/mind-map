@@ -10,7 +10,7 @@ export const useSettingsStore = create((set) => ({
   snapToGrid: false,
   
   // Mind map settings
-  defaultNodeColor: 'primary',
+  defaultNodeColor: 'primary-200',
   lineStyle: 'bezier', // 'bezier', 'straight', 'curved'
   lineThickness: 2,
   

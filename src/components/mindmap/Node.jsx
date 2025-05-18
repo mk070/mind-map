@@ -103,9 +103,10 @@ const Node = ({ node, onDrag }) => {
   return (
     <motion.div
       ref={nodeRef}
-      className={`absolute group ${isMainNode ? 'node-main' : 'node-child'} ${
+      data-node-id={node.id}  // Add this line
+      className={` absolute group ${isMainNode ? 'node-main' : 'node-child'} ${
         isSelected ? 'ring-2 ring-primary-500' : 'ring-1 ring-transparent'
-      } ${cursorClass} transition-all duration-200 rounded-lg`}
+      } ${cursorClass} transition-all duration-200 rounded-lg `}
       style={{ 
         left: node.x, 
         top: node.y,
@@ -113,6 +114,12 @@ const Node = ({ node, onDrag }) => {
         pointerEvents: 'auto',
         position: 'absolute',
         transformOrigin: 'center center'
+      }}
+      initial={{ opacity: 1, scale: 0.97 }}
+      animate={{ 
+        opacity: 1, 
+        scale: 1,
+        transition: { type: "spring", stiffness: 300, damping: 25 }
       }}
       onClick={handleSelect}
       onMouseEnter={handleMouseEnter}

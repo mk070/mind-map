@@ -64,12 +64,46 @@
   }
   
   .sidebar-item {
-    @apply flex items-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer
+    @apply relative flex items-center gap-2 px-3 py-2 rounded-lg transition-all cursor-pointer
     hover:bg-primary-500/10 dark:hover:bg-primary-500/20;
+    z-index: 40;
   }
   
   .sidebar-item.active {
-    @apply bg-primary-500/20 dark:bg-primary-500/30 text-primary-700 dark:text-primary-300;
+    @apply bg-primary-500/20 dark:bg-primary-500/30 text-primary-700 dark:text-primary-300 z-50;
+  }
+  
+  .search-dropdown {
+    position: absolute;
+    width: 100%;
+    background: var(--surface-50, #fafafa);
+    border: 1px solid var(--surface-200, #e5e7eb);
+    border-radius: 0.375rem;
+    margin-top: 0.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 50;
+    overflow: hidden;
+  }
+  
+  .dark .search-dropdown {
+    background: var(--surface-900, #111827);
+    border-color: var(--surface-700, #374151);
+  }
+  
+  .search-dropdown::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .search-dropdown::-webkit-scrollbar-track {
+    @apply bg-surface-100 dark:bg-surface-800 rounded-full;
+  }
+  
+  .search-dropdown::-webkit-scrollbar-thumb {
+    @apply bg-surface-300 dark:bg-surface-600 rounded-full;
+  }
+  
+  .search-dropdown::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-400 dark:bg-surface-500;
   }
   
   .tooltip {

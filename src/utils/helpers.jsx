@@ -1,3 +1,8 @@
+  // Utility for conditionally joining class names
+export function cn(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
 // Simple nanoid implementation for generating unique IDs
 export const nanoid = () => {
   return Math.random().toString(36).substring(2, 12);

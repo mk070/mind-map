@@ -11,7 +11,8 @@ const SettingsModal = () => {
     showGrid, toggleGrid,
     snapToGrid, toggleSnapToGrid,
     lineStyle, setLineStyle,
-    lineThickness, setLineThickness
+    lineThickness, setLineThickness,
+    lineLengthMultiplier, setLineLengthMultiplier,
   } = useSettingsStore();
   
   const backdropVariants = {
@@ -146,6 +147,18 @@ const SettingsModal = () => {
                 >
                   Bezier
                 </button>
+                <button 
+                  className={`p-2 text-xs rounded-lg ${lineStyle === 'zigzag' ? 'bg-primary-500 text-white' : 'bg-surface-dark/10 dark:bg-surface-light/10'}`}
+                  onClick={() => setLineStyle('zigzag')}
+                >
+                  zigzag
+                </button>
+                <button 
+                  className={`p-2 text-xs rounded-lg ${lineStyle === 'dashed' ? 'bg-primary-500 text-white' : 'bg-surface-dark/10 dark:bg-surface-light/10'}`}
+                  onClick={() => setLineStyle('dashed')}
+                >
+                  dashed
+                </button>
               </div>
             </div>
             
@@ -162,6 +175,21 @@ const SettingsModal = () => {
                   className="w-full"
                 />
                 <span className="ml-2 text-sm w-6 text-center">{lineThickness}</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm">Line length multiplier</label>
+              <div className="flex items-center">
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="2" 
+                  step="0.1" 
+                  value={lineLengthMultiplier}
+                  onChange={(e) => setLineLengthMultiplier(parseFloat(e.target.value))}
+                  className="w-full"
+                />
+                <span className="ml-2 text-sm w-6 text-center">{lineLengthMultiplier}</span>
               </div>
             </div>
           </div>

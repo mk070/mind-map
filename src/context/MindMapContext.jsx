@@ -58,14 +58,14 @@ export const MindMapProvider = ({ children }) => {
   const addChildNode = (parentId) => {
     // Calculate position offset from parent node
     const parentNode = nodes.find(node => node.id === parentId);
-    if (!parentNode) return;
+    if (!parentNode) return null;
     
     const angle = Math.random() * 2 * Math.PI;
     const distance = 150;
     const offsetX = Math.cos(angle) * distance;
     const offsetY = Math.sin(angle) * distance;
     
-    addNode({
+    return addNode({
       x: parentNode.x + offsetX,
       y: parentNode.y + offsetY,
       parentId
@@ -196,7 +196,8 @@ export const MindMapProvider = ({ children }) => {
       if (e.key === 'n' || e.key === 'N') {
         const x = window.innerWidth / 2 - 75; // Center horizontally
         const y = window.innerHeight / 2 - 25; // Center vertically
-        addNode({ x, y, content: 'New Main Node' });
+        const newNodeId = addNode({ x, y, content: 'New Main Node' });
+        selectNode(newNodeId);
       }
 
       // Delete Node (Delete)
@@ -207,7 +208,8 @@ export const MindMapProvider = ({ children }) => {
 
       // Add Child Node (Tab)
       if (e.key === 'Tab' && selectedNodeId) {
-        addChildNode(selectedNodeId);
+        const newNodeId = addChildNode(selectedNodeId);
+        selectNode(newNodeId);
       }
 
       // Search (Cmd+K)

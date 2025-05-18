@@ -16,44 +16,42 @@ function App() {
   // Register GSAP effects
   useEffect(() => {
     gsap.registerEffect({
-      name: "nodeExpand",
-      effect: (targets, config) => {
-        return gsap.from(targets, {
-          scale: 0.5,
-          opacity: 0,
-          duration: config.duration || 0.5,
-          ease: "elastic.out(1, 0.5)",
-          stagger: config.stagger || 0.1,
-        });
-      },
-      defaults: { duration: 0.5, stagger: 0.1 },
-      extendTimeline: true,
-    });
-    
-    gsap.registerEffect({
   name: "connectionDraw",
   effect: (targets, config) => {
+    // Get the total length of the path
+    const length = targets.getTotalLength();
+    
+    // Create a natural-looking drawing effect
     return gsap.from(targets, {
       attr: { 
         d: (i, target) => {
           const d = target.getAttribute("d");
           const startPoint = d.split(" ")[1]; // Get first point
           return `M ${startPoint} ${startPoint}`; 
-        }
+        },
+        // Add stroke dasharray for drawing effect
+        strokeDasharray: `${length} ${length}`,
+        strokeDashoffset: length,
+        // Add some variation to stroke width for a more natural look
+        strokeWidth: 1.5
       },
-      strokeDashoffset: (i, target) => {
-        const length = target.getTotalLength();
-        return [length, 0];
-      },
-      strokeDasharray: (i, target) => {
-        const length = target.getTotalLength();
-        return [`${length} ${length}`, `${length} 0`];
-      },
-      duration: config.duration || 0.5,
+      duration: config.duration || 0.4,
       ease: "power2.inOut",
+      onComplete: () => {
+        // Clean up after animation
+        targets.removeAttribute("stroke-dasharray");
+        targets.removeAttribute("stroke-dashoffset");
+        targets.removeAttribute("strokeWidth");
+      },
+      // Add some natural movement during drawing
+      modifiers: {
+        strokeWidth: (value) => {
+          return gsap.utils.interpolate(1.5, 2, gsap.utils.normalize(0, 1, gsap.utils.random(0.3, 0.7)));
+        }
+      }
     });
   },
-  defaults: { duration: 0.5 },
+  defaults: { duration: 0.4 },
   extendTimeline: true,
 });
 

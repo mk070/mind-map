@@ -91,13 +91,6 @@ const Node = ({ node, onDrag }) => {
     }
   }, [isSelected]);
   
-  // Apply entrance animation 
-  useEffect(() => {
-    if (!animationsEnabled || !nodeRef.current) return;
-    
-    gsap.effects.nodeExpand(nodeRef.current);
-  }, [animationsEnabled]);
-  
   // State-dependent variables are now defined at the top of the component
   
   return (

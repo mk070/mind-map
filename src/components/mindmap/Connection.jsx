@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useSettingsStore } from '../../store/settingsStore';
 
 const Connection = ({ connection, nodes }) => {
-  const { lineThickness, lineStyle } = useSettingsStore();
+  const { lineThickness, lineStyle, lineLengthMultiplier } = useSettingsStore();
   const pathRef = useRef(null);
   
   const fromNode = nodes.find(node => node.id === connection.from);
@@ -33,30 +33,73 @@ const Connection = ({ connection, nodes }) => {
   const toX = toNode.x;           // Left edge of child
   const toY = toNode.y + 20;      // Vertical center
 
-  // Generate path based on line style
-  let path;
-  switch (lineStyle) {
-    case 'bezier':
-      // Create a more noticeable bezier curve
-      const curveHeight = Math.abs(toY - fromY) * 0.5;
-      const curveDirection = toY > fromY ? -1 : 1;
-      const controlX = (fromX + toX) / 2;
-      const controlY = fromY + curveHeight * curveDirection;
-      path = `M ${fromX} ${fromY} Q ${controlX} ${controlY} ${toX} ${toY}`;
-      break;
+  // Generate path based on line style with optimized calculations
+  const generatePath = () => {
+    const deltaX = toX - fromX;
+    const deltaY = toY - fromY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     
-    case 'curved':
-      // Create a more pronounced curved line
-      const curveOffset = Math.abs(toY - fromY) * 0.3;
-      const curveX = (fromX + toX) / 2;
-      const curveY1 = fromY < toY ? fromY - curveOffset : fromY + curveOffset;
-      const curveY2 = fromY < toY ? toY + curveOffset : toY - curveOffset;
-      path = `M ${fromX} ${fromY} C ${fromX} ${curveY1}, ${curveX} ${curveY2}, ${toX} ${toY}`;
-      break;
-    
-    default: // straight
-      path = `M ${fromX} ${fromY} L ${toX} ${toY}`;
-  }
+    switch (lineStyle) {
+      case 'bezier':
+        // Create a natural-looking bezier curve
+        const bezierCurveHeight = Math.min(distance * 0.3, 80);
+        const bezierCurveDirection = deltaY > 0 ? -1 : 1;
+        const bezierControlX = fromX + (deltaX * 0.4 * lineLengthMultiplier);
+        const bezierControlY = fromY + (deltaY * 0.4 * lineLengthMultiplier);
+        const bezierToX = toX + (deltaX * (lineLengthMultiplier - 1));
+        const bezierToY = toY + (deltaY * (lineLengthMultiplier - 1));
+        return `M ${fromX} ${fromY} Q ${bezierControlX} ${bezierControlY + bezierCurveHeight * bezierCurveDirection} ${bezierToX} ${bezierToY}`;
+      
+      case 'curved':
+        // Create a natural-looking curved line with multiple control points
+        const curveOffset = Math.min(distance * 0.2, 60);
+        const curveX1 = fromX + (deltaX * 0.3 * lineLengthMultiplier);
+        const curveY1 = fromY + (deltaY * 0.3 * lineLengthMultiplier);
+        const curveX2 = toX + (deltaX * 0.3 * (lineLengthMultiplier - 1));
+        const curveY2 = toY + (deltaY * 0.3 * (lineLengthMultiplier - 1));
+        const curveToX = toX + (deltaX * (lineLengthMultiplier - 1));
+        const curveToY = toY + (deltaY * (lineLengthMultiplier - 1));
+        
+        // Add some variation to make it look more natural
+        const curveVariation = Math.random() * 20 - 10;
+        const curveY1Var = curveY1 + curveVariation;
+        const curveY2Var = curveY2 - curveVariation;
+        
+        return `M ${fromX} ${fromY} C ${curveX1} ${curveY1Var}, ${curveX2} ${curveY2Var}, ${curveToX} ${curveToY}`;
+      
+      case 'zigzag':
+        // Create a zigzag line with natural variation
+        const numZigs = Math.max(2, Math.floor(distance / 50));
+        const zigWidth = deltaX / (numZigs * 2);
+        const zigHeight = 20 + Math.random() * 5 - 2.5; // Add some variation
+        
+        let zigPath = `M ${fromX} ${fromY}`;
+        for (let i = 0; i < numZigs; i++) {
+          const zigVariation = Math.random() * 5 - 2.5;
+          const zigX = fromX + (zigWidth * (i * 2 + 1) * lineLengthMultiplier);
+          const zigY = fromY + (i % 2 === 0 ? zigHeight + zigVariation : -zigHeight + zigVariation);
+          zigPath += ` L ${zigX} ${zigY}`;
+          zigPath += ` L ${fromX + (zigWidth * (i * 2 + 2) * lineLengthMultiplier)} ${fromY}`;
+        }
+        const zigToX = toX + (deltaX * (lineLengthMultiplier - 1));
+        const zigToY = toY + (deltaY * (lineLengthMultiplier - 1));
+        zigPath += ` L ${zigToX} ${zigToY}`;
+        return zigPath;
+      
+      case 'dashed':
+        // For dashed lines, we'll return a regular path and use stroke-dasharray in the SVG
+        const dashToX = toX + (deltaX * (lineLengthMultiplier - 1));
+        const dashToY = toY + (deltaY * (lineLengthMultiplier - 1));
+        return `M ${fromX} ${fromY} L ${dashToX} ${dashToY}`;
+      
+      default: // straight
+        const straightToX = toX + (deltaX * (lineLengthMultiplier - 1));
+        const straightToY = toY + (deltaY * (lineLengthMultiplier - 1));
+        return `M ${fromX} ${fromY} L ${straightToX} ${straightToY}`;
+    }
+  };
+
+  const path = generatePath();
 
   return (
     <svg 
@@ -78,7 +121,7 @@ const Connection = ({ connection, nodes }) => {
         stroke="#ff0000"
         strokeWidth={lineThickness || 2}
         fill="none"
-        strokeDasharray="none"
+        strokeDasharray={lineStyle === 'dashed' ? "5,3" : "none"}
       />
       
       {/* Arrow at the end of the line */}
